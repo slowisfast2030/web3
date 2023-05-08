@@ -115,3 +115,76 @@ contract PokemonContract {
     }
 }
 ```
+
+
+# memory vs calldata
+
+## example1
+
+```solidity
+pragma solidity 0.8.10;
+
+contract Test {
+    string stringTest;
+
+    // This function uses memory for the parameter and the return value
+    function memoryTest(string memory _exampleString) public returns (string memory) {
+        _exampleString = "example"; // You can modify memory
+        string memory newString = _exampleString; // You can use memory within a function's logic
+        return newString; // You can return memory
+    }
+
+    // This function uses calldata for the parameter and memory for the return value
+    function calldataTest(string calldata _exampleString) external returns (string memory) {
+        // _exampleString = "example"; // You cannot modify calldata
+        // string calldata newString = _exampleString; // You cannot use calldata within a function's logic
+        return _exampleString; // You can return calldata as memory
+    }
+}
+```
+
+解释：
+
+- Memory is used to hold temporary variables during function execution, while calldata is used to hold function arguments passed in from an external caller.
+- Memory is mutable and can be modified within a function, while calldata is immutable and cannot be changed. Memory can be used for both function declaration parameters and within the function logic, while calldata can only be used for function declaration parameters.
+- Memory must be used for dynamic parameters of an internal or public function, while calldata must be used for dynamic parameters of an external function.
+
+# public vs external
+
+```solidity
+pragma solidity ^0.8.0;
+
+contract Test {
+    // A public function that can be called externally or internally
+    function add(uint[] memory _arr) public pure returns (uint) {
+        uint sum = 0;
+        for (uint i = 0; i < _arr.length; i++) {
+            sum += _arr[i];
+        }
+        return sum;
+    }
+
+    // An external function that can only be called externally
+    function mul(uint[] calldata _arr) external pure returns (uint) {
+        uint product = 1;
+        for (uint i = 0; i < _arr.length; i++) {
+            product *= _arr[i];
+        }
+        return product;
+    }
+}
+```
+
+思考：
+
+> 可以有如下近似等式
+>
+> public = external + internal
+
+Q：
+
+> 当一个 public 函数被外部调用时，Solidity 会将参数复制到内存中，这样才能在函数内部使用它们。将参数复制到内存中，那么参数一开始在哪里？
+
+A:
+
+> 当一个 public 函数被外部调用时，参数一开始在 calldata 中。calldata 是一种特殊的数据位置，它包含了外部函数调用的参数。calldata 是只读的，不能被修改。Solidity 会将参数从 calldata 复制到内存中，这样才能在函数内部使用它们。复制到内存中会消耗一些 gas，所以如果参数是大型数组的话，可能会比较昂贵。
