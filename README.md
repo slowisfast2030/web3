@@ -274,3 +274,18 @@ ins.printVotes().then(function(res){console.log(res)})
 res = await ins.printVotes()
 console.log(res)
 ```
+
+# 初始化数组
+
+```solidity
+// 假设你想初始化一个长度为3的bytes32数组
+bytes32[] memory array = new bytes32[](3);
+
+// 你可以使用下标来给数组赋值
+array[0] = "hello";
+array[1] = "world";
+array[2] = "bing";
+
+// 你也可以使用字面量来初始化数组
+bytes32[] memory array2 = ["hello", "world", "bing"];
+```
