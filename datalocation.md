@@ -151,6 +151,8 @@ contract Test {
 
 # public vs external
 
+## example1
+
 ```solidity
 pragma solidity ^0.8.0;
 
@@ -181,6 +183,17 @@ contract Test {
 >
 > public = external + internal
 
+总结：
+
+- Public and external functions are both callable from outside the contract, but they differ in how they handle arguments and how they can be called internally.
+- Public functions can be called either externally or internally, meaning from within the contract or from another contract.
+- When a public function is called externally, Solidity copies the arguments to memory, which can be expensive if the arguments are large arrays of data. When a public function is called internally, it uses pointers to memory locations, which is cheaper and faster. 这句话感觉非常奇怪！！！这就涉及到一个根本问题：arguments一开始在哪里？从前文表述来看，arguments像是一开始就在内存中。被外部调用的时候，会被复制一遍；被内部调用的时候，直接使用指针。暂时默认参数一开始在calldata中！
+- External functions read the arguments directly from calldata, which is a special data location that contains the function arguments. Reading from calldata is cheaper than copying to memory, so external functions can save gas when dealing with large arrays of data.
+
+
+
+## example2 
+
 Q：
 
 > 当一个 public 函数被外部调用时，Solidity 会将参数复制到内存中，这样才能在函数内部使用它们。将参数复制到内存中，那么参数一开始在哪里？
@@ -188,3 +201,55 @@ Q：
 A:
 
 > 当一个 public 函数被外部调用时，参数一开始在 calldata 中。calldata 是一种特殊的数据位置，它包含了外部函数调用的参数。calldata 是只读的，不能被修改。Solidity 会将参数从 calldata 复制到内存中，这样才能在函数内部使用它们。复制到内存中会消耗一些 gas，所以如果参数是大型数组的话，可能会比较昂贵。
+
+## example3 本质思考
+
+```solidity
+pragma solidity^0.4.12;
+
+contract Test {
+    function test(uint[20] a) public returns (uint){
+         return a[10]*2;
+    }
+
+    function test2(uint[20] a) external returns (uint){
+         return a[10]*2;
+    }
+}
+```
+
+Calling each function, we can see that the `public` function uses 496 gas, while the `external` function uses only 261.
+
+public函数会比external函数更加消耗gas！
+
+
+The difference is because in public functions, Solidity immediately copies array arguments to memory, while external functions can read directly from calldata. Memory allocation is expensive, whereas reading from calldata is cheap.
+
+这句话的潜台词：对于外部调用，参数会从calldata --> memory。
+
+
+
+延伸出一个进阶的问题：为什么piublic函数的参数不从calldata读取呢？
+
+The reason that `public` functions need to write all of the arguments to memory is that public functions may be called internally, which is actually an entirely different process than external calls. Internal calls are executed via jumps in the code, and array arguments are passed internally by pointers to memory. 
+
+Thus, when the compiler generates the code for an internal function, that function expects its arguments to be located in memory.这句话的潜台词就是public函数可能在合约内部被调用，这种可能性拖累了public函数，使得多出了拷贝至内存的操作！
+
+
+
+For external functions, the compiler doesn't need to allow internal calls, and so it allows arguments to be read directly from calldata, saving the copying step.
+
+external函数直接读取calldata内容，省去了复制操作！
+
+总结：
+
+当一个函数可以被设计成仅被外部调用，又传入大量参数，那么选择external！
+
+
+
+# public external internel private
+
+- **public -** all can access public
+- **external -** Cannot be accessed internally, only externally
+- **internal -** only this contract and contracts deriving from it can access
+- **private -** can be accessed only from this contract
