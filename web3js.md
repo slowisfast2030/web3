@@ -74,5 +74,3 @@ console.log('hello'))
 ```js
 console.log('world')
 ```
-
-## ai
