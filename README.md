@@ -94,6 +94,7 @@ truffle console> ins.voteForCandidate.request('0x5678')
 # truffle console
 
 ## 数组遍历
+
 ```js
 // 在truffle console环境下，遍历accounts，返回balance
 web3.eth.getAccounts (function (err, accounts) {
@@ -124,6 +125,7 @@ numbers2.forEach(function (num) {
 ```
 
 ## await报错
+
 ```js
 /**
 accounts.forEach(function(account){balance = await web3.eth.getBalance(account)})
@@ -161,11 +163,15 @@ accounts.forEach(function(account) {
 ```
 
 ## trick
+
 命令
+
 ```js
 truffle(Voting)> ins.methods
 ```
+
 返回
+
 ```
 {
   'candidateList(uint256)': [Function (anonymous)] {
@@ -200,11 +206,15 @@ truffle(Voting)> ins.methods
   }
 }
 ```
+
 命令
+
 ```js
 truffle(Voting)> ins.methods['candidateList(uint256)']
 ```
+
 返回
+
 ```
 [Function (anonymous)] {
   call: [Function (anonymous)],
@@ -213,12 +223,15 @@ truffle(Voting)> ins.methods['candidateList(uint256)']
   request: [Function (anonymous)]
 }
 ```
+
 命令
+
 ```js
 truffle(Voting)> ins.candidateList
 ```
 
 返回
+
 ```
 [Function (anonymous)] {
   call: [Function (anonymous)],
@@ -229,12 +242,13 @@ truffle(Voting)> ins.candidateList
 ```
 
 ## 函数结果的遍历
+
 ```js
 function printVotes() view public returns (bytes32[] memory, uint8[] memory) {
         uint len = candidateList.length;
         bytes32[] memory names = new bytes32[](len);
         uint8[] memory votes = new uint8[](len);
-        
+      
         for (uint i = 0; i < len; i++) {
             names[i] = candidateList[i];
             votes[i] = votesReceived[candidateList[i]];
@@ -242,18 +256,21 @@ function printVotes() view public returns (bytes32[] memory, uint8[] memory) {
         return (names, votes);
     }
 ```
+
 在truffle console环境下有三种方法打印结果
+
 ```js
 // 回调函数
 ins.printVotes(function(err, res){console.log(res)})
 ```
+
 ```js
 // promise
 ins.printVotes().then(function(res){console.log(res)})
 ```
+
 ```js
 // await
 res = await ins.printVotes()
 console.log(res)
 ```
-
