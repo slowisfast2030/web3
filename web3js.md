@@ -56,7 +56,7 @@ output:
 '0x4368696e657365'
 ```
 
-* [ ] bytes32和string的区别
+## bytes32和string的区别
 
 bytes32是一个固定大小的数组
 string是一个动态大小的数组
