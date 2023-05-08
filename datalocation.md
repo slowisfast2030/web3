@@ -85,3 +85,33 @@ contract Example {
 总结：
 
 > public和external函数不能返回storage引用是因为这样会暴露合约的内部状态给外部调用者，可能会造成安全风险。storage引用只能在internal和private函数中使用，因为它们只能被同一个合约或者继承的合约调用。如果你想让public或external函数返回storage中的数据，你可以使用memory类型的返回值，这样会在memory中创建一个storage数据的副本，并返回给调用者。
+
+## example4
+
+```solidity
+contract PokemonContract {
+    struct Pokemon {
+        string name;
+        uint power;
+        uint stamina;
+        uint level;
+    }
+
+    Pokemon[] pokemonCollection;
+
+    function levelUp(uint _index) public {
+        // Declaring this variable as`storage` means it'll actually a pointer
+        // to pokemonCollection [_index]
+        Pokemon storage selectedPokemon = pokemonCollection[_index];
+        // so updating it will cause that it will change
+        // pokemonCollection [_index] on the blockchain.
+        selectedPokemon.level += 1;
+
+    	// Using`memory` the variable will be a copy of the data
+        Pokemon memory anotherPokemon = pokemonCollection[_index + 1];
+        // updating it will not modify the data stored in the blockchain
+        anotherPokemon.level += 1;
+        // and the variable will be lost once the function execution ends
+    }
+}
+```
