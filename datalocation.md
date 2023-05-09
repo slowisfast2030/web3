@@ -437,13 +437,60 @@ contract StorageLocation {
 
 ```
 
-
 # public external internel private
 
 - **public -** all can access public
 - **external -** Cannot be accessed internally, only externally
 - **internal -** only this contract and contracts deriving from it can access
 - **private -** can be accessed only from this contract
+
+# 函数参数的复制问题
+
+```solidity
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.5.0 <0.9.0;
+
+contract C {
+    // The data location of x is storage.
+    // This is the only place where the
+    // data location can be omitted.
+    uint[] x;
+
+    // The data location of memoryArray is memory.
+    function f(uint[] memory memoryArray) public {
+        x = memoryArray; // works, copies the whole array to storage
+        uint[] storage y = x; // works, assigns a pointer, data location of y is storage
+        y[7]; // fine, returns the 8th element
+        y.pop(); // fine, modifies x through y
+        delete x; // fine, clears the array, also modifies y
+        // The following does not work; it would need to create a new temporary /
+        // unnamed array in storage, but storage is "statically" allocated:
+        // y = memoryArray;
+        // Similarly, "delete y" is not valid, as assignments to local variables
+        // referencing storage objects can only be made from existing storage objects.
+        // It would "reset" the pointer, but there is no sensible location it could point to.
+        // For more details see the documentation of the "delete" operator.
+        // delete y;
+        g(x); // calls g, handing over a reference to x
+        h(x); // calls h and creates an independent, temporary copy in memory
+    }
+
+    function g(uint[] storage _x) internal pure {}
+    function h(uint[] memory _x) public pure {}
+}
+```
+
+以前一直对于 `function h(uint[] memory) public pure{}`
+
+感到很疑惑，即函数参数是memory类型。经常看到的表述是，当函数类型是public的时候，函数参数会复制到内存中。
+
+当时一直很疑惑的点，复制的源头在哪里呢？
+
+在这个例子中，h函数的参数源头是状态变量。
+
+
+
+
 
 # 参考文献
 
