@@ -1,4 +1,5 @@
 # abi + bytecode = deploy
+
 ```js
 const Web3 = require('web3');
 const fs = require('fs');
@@ -40,3 +41,5 @@ MyContract.deploy(deployParams)
   });
 
 ```
+
+如何获取字节码和abi有很多途径。
