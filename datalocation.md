@@ -1,3 +1,104 @@
+# 疑问
+
+每一个引用类型都会有data location，可以是storage、memory和calldata。
+
+比如说，一个mapping，存储在storage区域。
+
+```solidity
+mapping(bytes32 => uint8) public votesReceived;
+```
+
+我们知道votesReceived是指向storage的引用，那么这个引用本身存储在哪里呢？
+
+个人猜测：引用本身和值类型一样的存储。
+
+# storage memory code
+
+```solidity
+contract PokemonContract {
+    struct Pokemon {
+        string name;
+        uint power;
+        uint stamina;
+        uint level;
+    }
+
+    Pokemon[] pokemonCollection;
+
+    function levelUp(uint _index) public {
+        // 将此变量声明为`storage`意味着它实际上是一个指针
+        // 指向pokemonCollection [_index]
+        Pokemon storage selectedPokemon = pokemonCollection[_index];
+        // 因此更新它将导致
+        // 在区块链上更改pokemonCollection [_index]。
+        selectedPokemon.level += 1;
+
+        // 使用`memory`变量将是数据的副本
+        Pokemon memory anotherPokemon = pokemonCollection[_index + 1];
+        // 更新它不会修改存储在区块链中的数据
+        anotherPokemon.level += 1;
+        // 并且变量将在函数执行结束后丢失
+    }
+}
+
+```
+
+```solidity
+contract Example {
+    uint256[] public numbers; // storage variable
+
+    function foo() public {
+        numbers.push(1); // numbers = [1]
+        uint256[] storage localNumbers = numbers; // create a reference to numbers
+        localNumbers.push(2); // numbers = [1, 2], localNumbers = [1, 2]
+        uint256[] memory memoryNumbers = new uint256[](2); // create a new memory array
+        memoryNumbers[0] = 3; // memoryNumbers = [3, 0]
+        memoryNumbers[1] = 4; // memoryNumbers = [3, 4]
+        uint256[] memory anotherMemoryNumbers = memoryNumbers; // create a reference to memoryNumbers
+        anotherMemoryNumbers[0] = 5; // memoryNumbers = [5, 4], anotherMemoryNumbers = [5, 4]
+    }
+}
+```
+
+```solidity
+contract Example {
+    uint256[] public numbers; // storage variable
+
+    function foo() public {
+        numbers.push(1); // numbers = [1]
+        uint256[] memory memoryNumbers = numbers; // create a copy of numbers in memory
+        memoryNumbers.push(2); // numbers = [1], memoryNumbers = [1, 2]
+        numbers = memoryNumbers; // create a copy of memoryNumbers in storage
+        numbers.push(3); // numbers = [1, 2, 3], memoryNumbers = [1, 2]
+    }
+}
+```
+
+```solidity
+contract Example {
+    struct Person {
+        string name;
+        uint256 age;
+    }
+
+    Person[] public people; // storage variable
+
+    function foo() public {
+        people.push(Person("Alice", 20)); // people = [{name: "Alice", age: 20}]
+        Person memory memoryPerson = Person("Bob", 30); // create a new memory struct
+        memoryPerson.age = 40; // memoryPerson = {name: "Bob", age: 40}
+        people.push(memoryPerson); // create a copy of memoryPerson in storage
+        people[1].age = 50; // people = [{name: "Alice", age: 20}, {name: "Bob", age: 50}], memoryPerson = {name: "Bob", age: 40}
+        Person storage storagePerson = people[0]; // create a reference to people[0]
+        storagePerson.age = 25; // people = [{name: "Alice", age: 25}, {name: "Bob", age: 50}], storagePerson = {name: "Alice", age: 25}
+        Person memory anotherMemoryPerson = storagePerson; // create a copy of storagePerson in memory
+        anotherMemoryPerson.age = 35; // people = [{name: "Alice", age: 25}, {name: "Bob", age: 50}], storagePerson = {name: "Alice", age: 25}, anotherMemoryPerson = {name: "Alice", age: 35}
+    }
+}
+
+```
+
+
 # storage vs memory
 
 ## example1 数据复制：storage --> memory
@@ -116,7 +217,6 @@ contract PokemonContract {
 }
 ```
 
-
 # memory vs calldata
 
 ## example1
@@ -190,9 +290,7 @@ contract Test {
 - When a public function is called externally, Solidity copies the arguments to memory, which can be expensive if the arguments are large arrays of data. When a public function is called internally, it uses pointers to memory locations, which is cheaper and faster. 这句话感觉非常奇怪！！！这就涉及到一个根本问题：arguments一开始在哪里？从前文表述来看，arguments像是一开始就在内存中。被外部调用的时候，会被复制一遍；被内部调用的时候，直接使用指针。暂时默认参数一开始在calldata中！
 - External functions read the arguments directly from calldata, which is a special data location that contains the function arguments. Reading from calldata is cheaper than copying to memory, so external functions can save gas when dealing with large arrays of data.
 
-
-
-## example2 
+## example2
 
 Q：
 
@@ -222,20 +320,15 @@ Calling each function, we can see that the `public` function uses 496 gas, whi
 
 public函数会比external函数更加消耗gas！
 
-
 The difference is because in public functions, Solidity immediately copies array arguments to memory, while external functions can read directly from calldata. Memory allocation is expensive, whereas reading from calldata is cheap.
 
 这句话的潜台词：对于外部调用，参数会从calldata --> memory。
 
-
-
 延伸出一个进阶的问题：为什么piublic函数的参数不从calldata读取呢？
 
-The reason that `public` functions need to write all of the arguments to memory is that public functions may be called internally, which is actually an entirely different process than external calls. Internal calls are executed via jumps in the code, and array arguments are passed internally by pointers to memory. 
+The reason that `public` functions need to write all of the arguments to memory is that public functions may be called internally, which is actually an entirely different process than external calls. Internal calls are executed via jumps in the code, and array arguments are passed internally by pointers to memory.
 
 Thus, when the compiler generates the code for an internal function, that function expects its arguments to be located in memory.这句话的潜台词就是public函数可能在合约内部被调用，这种可能性拖累了public函数，使得多出了拷贝至内存的操作！
-
-
 
 For external functions, the compiler doesn't need to allow internal calls, and so it allows arguments to be read directly from calldata, saving the copying step.
 
@@ -245,11 +338,14 @@ external函数直接读取calldata内容，省去了复制操作！
 
 当一个函数可以被设计成仅被外部调用，又传入大量参数，那么选择external！
 
-
-
 # public external internel private
 
 - **public -** all can access public
 - **external -** Cannot be accessed internally, only externally
 - **internal -** only this contract and contracts deriving from it can access
 - **private -** can be accessed only from this contract
+
+
+# 参考文献
+
+[Solidity Fundamentals](https://medium.com/coinmonks/solidity-fundamentals-a71bf54c0b98)
