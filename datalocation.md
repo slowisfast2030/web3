@@ -12,6 +12,32 @@ mapping(bytes32 => uint8) public votesReceived;
 
 个人猜测：引用本身和值类型一样的存储。
 
+# storage variable作为函数参数
+
+```solidity
+contract StorageExample {
+    struct S {string a; uint b;}
+    S s = S("storage", 1); // 状态变量，默认为storage
+
+    function storageToMemory(S storage x) internal {
+        S memory tmp = x; // 从storage拷贝到memory
+        tmp.a = "Test"; // 不影响storage
+    }
+
+    function memoryToStorage(S memory tmp) internal {
+        s = tmp; // 从memory拷贝到storage
+        tmp.a = "Test"; // 不影响storage
+    }
+
+    function storageToStorage(S storage x) internal {
+        S storage tmp = x; // 引用传递
+        tmp.a = "Test"; // 影响storage
+    }
+}
+```
+
+storage variable可以作为函数参数的，但函数的类型必须为internal或者private。
+
 # storage memory code
 
 ```solidity
@@ -98,6 +124,18 @@ contract Example {
 
 ```
 
+```solidity
+contract Example {
+    uint256[] public numbers; // storage variable
+
+    function foo(uint256[] calldata input) external {
+        uint256[] memory memoryNumbers = input; // create a copy of input in memory
+        memoryNumbers.push(1); // input = [], memoryNumbers = [1]
+        numbers = input; // create a copy of input in storage
+        numbers.push(2); // input = [], numbers = [2]
+    }
+}
+```
 
 # storage vs memory
 
