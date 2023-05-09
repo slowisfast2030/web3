@@ -58,7 +58,7 @@ bytes1: 0x01
 bytes1: 0x02
 ```
 
-# 区别
+# 使用场景
 
 在solidity中，Dynamically-sized byte array和Fixed-size byte arrays的使用场景不同。
 
