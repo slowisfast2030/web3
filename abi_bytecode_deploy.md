@@ -42,4 +42,4 @@ MyContract.deploy(deployParams)
 
 ```
 
-如何获取字节码和abi有很多途径。
+如何获取字节码和abi有很多途径
