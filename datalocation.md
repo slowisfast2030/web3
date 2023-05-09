@@ -376,13 +376,74 @@ external函数直接读取calldata内容，省去了复制操作！
 
 当一个函数可以被设计成仅被外部调用，又传入大量参数，那么选择external！
 
+# new bing解释data location change
+
+```solidity
+//SPDX-License-Identifier: Unlicense
+pragma solidity >=0.7.0 <0.9.0;
+
+contract StorageLocation {
+    Person[] public persons;
+
+    struct Person {
+        string name;
+        uint age;
+        address personAddress;
+    }
+
+    constructor() {
+       // 在构造函数中，newperson和personTwo都是memory类型的Person结构体，它们是在内存中创建的临时变量。
+       Person memory newperson = Person({
+           name: "Jamie",
+           age: 33,
+           personAddress: msg.sender
+       });
+
+       Person memory personTwo = Person({
+           name: "Bones Man",
+           age: 33,
+           personAddress: msg.sender
+       });
+       // 当把newperson和personTwo推入persons数组时，它们会被复制到storage类型的数组中，
+       // 因为persons是一个状态变量，默认存储在区块链上。
+       persons.push(newperson);
+       persons.push(personTwo);
+    }
+
+    // 在loadPerson函数中，返回值是一个memory类型的Person数组，它是一个persons数组的副本，存储在内存中。
+    function loadPerson() public view returns ( Person[] memory ){
+        return persons;
+    }
+ 
+    // 在changeDataone函数中，person是一个memory类型的Person结构体，它是从persons数组中复制出来的一个元素。
+    // 当修改person.age时，并不会影响persons数组中的数据。
+    function changeDataone() public view {
+        Person memory person = persons[0];
+        person.age = 56;
+    }
+  
+    // 在changeDataTwo函数中，person是一个storage类型的Person结构体，它是一个指向persons数组中第一个元素的引用。
+    // 当修改person.age时，会直接改变persons数组中的数据。
+    function changeDataTwo() public {
+        Person storage person = persons[0];
+        person.age = 76;
+    }
+
+    // 在receiveAsCallData函数中，参数a是一个calldata类型的uint256数组，它是不可修改的，并且只能用于外部函数。
+    function receiveAsCallData(uint256[] calldata a) public {
+        //you can not modify a
+    }
+}
+
+```
+
+
 # public external internel private
 
 - **public -** all can access public
 - **external -** Cannot be accessed internally, only externally
 - **internal -** only this contract and contracts deriving from it can access
 - **private -** can be accessed only from this contract
-
 
 # 参考文献
 
