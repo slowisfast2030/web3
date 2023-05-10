@@ -39,6 +39,8 @@ contract.deploy({
 
 如何获取字节码和abi有很多途径
 
+下面给出了获取字节码和abi的方法
+
 # solcjs solc
 
 solcjs是可执行命令
