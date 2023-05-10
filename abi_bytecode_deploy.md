@@ -81,4 +81,4 @@ let bytecode = compiledContract.contracts[':HelloWorld'].bytecode;
 
 所以在bilibili讲了很几个视频片段的编译脚本，其实就是在告诉我们truffle compile底层原理。
 
-truffle migrate
+truffle migrate亦然。

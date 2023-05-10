@@ -1,3 +1,14 @@
+# version
+
+web3.js使用最多的有两个版本：
+
+- 0.x：只支持回调
+- 1.x：支持回调 + promise，可以和async/await使用
+
+使用async/await代码可读性更好
+
+
+
 # bytes32 in solidity and nodejs
 
 ## 在合约中定义bytes32数组
