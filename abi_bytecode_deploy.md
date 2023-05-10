@@ -68,3 +68,17 @@ let compiledContract = solc.compile(source, 1);
 let abi = compiledContract.contracts[':HelloWorld'].interface;
 let bytecode = compiledContract.contracts[':HelloWorld'].bytecode;
 ```
+
+# truffle猜想
+
+我们拿到solc的编译结果后，可以进一步将编译结果保存到contracts.json文件，这份文件中有abi和bytecode。
+
+打开truffle的build文件夹，会发现，这里也有对应的json文件。
+
+可以发现，当我们执行truffle compile命令的时候，其实背后就是执行了solc.compile命令，生成了对应的json文件。
+
+为了保证每次编译的结果都是最新的，在保存json文件之前，需要对保存路径进行clean up。truffle也实现了这个功能。
+
+所以在bilibili讲了很几个视频片段的编译脚本，其实就是在告诉我们truffle compile底层原理。
+
+truffle migrate
