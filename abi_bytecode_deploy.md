@@ -46,6 +46,7 @@ solcjs是可执行命令
 solc是js库
 
 通过solcjs命令，可以获取字节码和abi
+
 ```sh
 solcjs --abi contract.sol
 
@@ -53,3 +54,15 @@ solcjs --bin contract.sol
 ```
 
 也可以在js文件中导入solc库，对合约进行编译
+
+```js
+// 读取合约源代码文件
+let source = fs.readFileSync('HelloWorld.sol', 'utf8');
+
+// 编译合约源代码，得到合约的字节码和接口
+let compiledContract = solc.compile(source, 1);
+
+// 获取合约abi和bytecode
+let abi = compiledContract.contracts[':HelloWorld'].interface;
+let bytecode = compiledContract.contracts[':HelloWorld'].bytecode;
+```
