@@ -264,3 +264,15 @@ mocha car.spec.js
 	"deploy": "node ./scripts/deploy.js"
 },
 ```
+
+执行
+
+```sh
+npm run compile
+
+npm run test
+
+npm run deploy
+```
+
+truffle很明显使用了npm script机制！
