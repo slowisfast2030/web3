@@ -257,7 +257,7 @@ mocha car.spec.js
 
 ```json
 "scripts": { 
-    "compile": "./scripts/compile.js", 
+	"compile": "./scripts/compile.js", 
 	"pretest": "npm run compile",
 	"test": "./node_modules/mocha/bin/mocha tests/",
 	"predeploy": "npm run compile",
@@ -269,9 +269,7 @@ mocha car.spec.js
 
 ```sh
 npm run compile
-
 npm run test
-
 npm run deploy
 ```
 
