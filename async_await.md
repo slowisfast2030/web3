@@ -44,3 +44,11 @@ fetchData().then(data => console.log(data));
     console.log(data);
 })();
 ```
+
+# 备注
+
+在 node 交互窗口中，可以直接使用 `await` 是因为该窗口实际上是一个 Read-Eval-Print-Loop (REPL) 环境。
+
+当你输入代码并按下回车键时，该代码会被立即评估和执行，而不需要将其包装在异步函数或 Promise 中。
+
+因此，您可以直接使用 `await` 关键字来暂停和等待异步操作的完成，这只适用于 REPL 环境，如果您在文件中使用 `await`，则必须将其放在异步函数中或者使用 `.then()` 方法获取 Promise 的结果。
