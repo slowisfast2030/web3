@@ -38,3 +38,18 @@ contract.deploy({
 ```
 
 如何获取字节码和abi有很多途径
+
+# solcjs solc
+
+solcjs是可执行命令
+
+solc是js库
+
+通过solcjs命令，可以获取字节码和abi
+```sh
+solcjs --abi contract.sol
+
+solcjs --bin contract.sol
+```
+
+也可以在js文件中导入solc库，对合约进行编译
