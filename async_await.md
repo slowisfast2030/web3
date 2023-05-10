@@ -24,6 +24,10 @@ async function fetchData() {
 
 因为申明了异步，所以异步函数的定义内部可以使用await关键字。
 
+> fetchData是异步函数，返回的是Promise对象。
+>
+> 可以猜想：fetch函数的实现方式也是通过async定义的。
+
 # 调用
 
 异步函数返回的是一个Promise对象。
