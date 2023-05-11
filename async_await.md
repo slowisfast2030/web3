@@ -53,7 +53,6 @@ fetchData().then(data => console.log(data));
 
 因此，您可以直接使用 `await` 关键字来暂停和等待异步操作的完成，这只适用于 REPL 环境，如果您在文件中使用 `await`，则必须将其放在异步函数中或者使用 `.then()` 方法获取 Promise 的结果。
 
-
 # 注意
 
 async定义了一个异步函数，异步函数返回的是一个Promise
@@ -82,7 +81,6 @@ fetchData().then(data => console.log(data));
 在定义fetchData函数的过程中，如果不使用await，该如何写呢？
 
 有其他的写法，但总是没有使用await优雅！
-
 
 > async函数内部有一个异步函数操作，Promise初始化的代码也有一个异步函数操作。
 >
@@ -129,7 +127,6 @@ async function fetchTwo() { // 定义一个async函数
 fetchTwo(); // 调用async函数
 ```
 
-
 # 回调、then、await
 
 js相对于python，最主要的区别就是每一个函数从同步变成了异步。
@@ -145,15 +142,75 @@ accounts.forEach((account)=>{
 	web3.eth.getBalance(account, (err,balance)=>
 		console.log(account+": "+balance))})
 ```
+
 ## then
+
 ```js
 accounts.forEach((account)=>{
 	web3.eth.getBalance(account)
 		.then(balance=>console.log(account+": "+balance))})
 ```
+
 ## async/await
+
 ```js
 accounts.forEach(async (account)=>{
 	let balance = await web3.eth.getBalance(account);
 	console.log(account+": "+balance)})
+```
+
+
+
+# 回调、then、await
+
+## 回调
+
+```javascript
+// 使用回调函数的写法
+accounts.forEach(function(account) { // 遍历账户数组
+  web3.eth.getBalance(account, function(error, balance) { // 获取账户余额，传递一个回调函数作为第二个参数
+    if (error) { // 处理错误
+      console.error(error); // 打印错误信息
+    } else { // 处理结果
+      console.log(account + ": " + balance); // 打印账户和余额
+    }
+  });
+});
+```
+
+## then
+
+```javascript
+// 使用then的语法
+function printBalances(accounts) { // 定义一个普通函数
+  accounts.forEach(account => { // 遍历账户数组
+    web3.eth.getBalance(account) // 获取账户余额，返回一个Promise对象
+    .then(balance => { // 处理Promise对象的结果
+      console.log(`${account}: ${balance}`); // 使用模板字符串打印账户和余额
+    })
+    .catch(error => { // 处理错误
+      console.error(error); // 打印错误信息
+    });
+  });
+}
+
+printBalances(accounts); // 调用普通函数
+```
+
+## async/await
+
+```javascript
+// 使用async/await语法
+async function printBalances(accounts) { // 定义一个async函数
+  for (let account of accounts) { // 遍历账户数组
+    try {
+      let balance = await web3.eth.getBalance(account); // 等待获取账户余额
+      console.log(`${account}: ${balance}`); // 使用模板字符串打印账户和余额
+    } catch (error) { // 处理错误
+      console.error(error); // 打印错误信息
+    }
+  }
+}
+
+printBalances(accounts); // 调用async函数
 ```
