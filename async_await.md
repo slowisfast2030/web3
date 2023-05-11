@@ -136,4 +136,24 @@ js相对于python，最主要的区别就是每一个函数从同步变成了异
 
 异步函数执行有3种方法，回调、then和await
 
-* [ ] await方法是最简洁的！！！
+await方法是最简洁的！！！
+
+## 回调
+
+```js
+accounts.forEach((account)=>{
+	web3.eth.getBalance(account, (err,balance)=>
+		console.log(account+": "+balance))})
+```
+## then
+```js
+accounts.forEach((account)=>{
+	web3.eth.getBalance(account)
+		.then(balance=>console.log(account+": "+balance))})
+```
+## async/await
+```js
+accounts.forEach(async (account)=>{
+	let balance = await web3.eth.getBalance(account);
+	console.log(account+": "+balance)})
+```
