@@ -29,19 +29,45 @@ var rs = fs.createReadStream('./demofile.txt');是一个异步函数，rs对象�
 
 
 
-// // Import the events module
-// const events = require('events');
+// Import the events module
+const events = require('events');
 
-// // Create an event emitter object
-// const eventEmitter = new events.EventEmitter();
+// Create an event emitter object
+const eventEmitter = new events.EventEmitter();
 
-// // Create an event handler function
-// const myEventHandler = function () {
-//   console.log('I hear a scream!');
-// }
+// Create an event handler function
+const myEventHandler = function () {
+  console.log('I hear a scream!');
+}
 
-// // Assign the event handler to an event
-// eventEmitter.on('scream', myEventHandler);
+// Assign the event handler to an event
+eventEmitter.on('scream', myEventHandler);
 
-// // Fire the 'scream' event
-// eventEmitter.emit('scream');
+// Fire the 'scream' event
+eventEmitter.emit('scream');
+
+
+
+//Create a custom event class called 'MessageEvent'
+class MessageEvent extends EventEmitter {
+    constructor() {
+      super();
+    }
+  
+    //Define a method to emit a 'message' event with some data
+    sendMessage(message) {
+      this.emit('message', message);
+    }
+  }
+  
+  //Create an instance of the custom event class
+  const messageEvent = new MessageEvent();
+  
+  //Create an event listener for the 'message' event
+  messageEvent.on('message', (message) => {
+    console.log(`Message received: ${message}`);
+  });
+  
+  //Call the custom method to emit the 'message' event with some data
+  messageEvent.sendMessage('Hello, MessageEvent!');
+  
