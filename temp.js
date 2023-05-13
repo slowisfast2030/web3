@@ -25,8 +25,6 @@ var rs = fs.createReadStream('./demofile.txt');是一个异步函数，rs对象�
 然后为rs对象绑定事件处理函数。
 当文件打开后，会触发open事件，执行回调函数。
 当文件读完后，会触发end事件，执行回调函数。
-
-
  */
 
 
