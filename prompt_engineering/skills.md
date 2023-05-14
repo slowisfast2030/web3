@@ -5,8 +5,7 @@
 - step by step
 - in great details
 
-what is the difference between promise and callback in javascript?
-
+you are javascript master. what is the difference between promise and callback in javascript?
 - explain in great detail
 - explain step by step
 - give code snippet
@@ -29,5 +28,7 @@ what is the difference between promise and callback in javascript?
 # 设定你的角色
 
 # 设定chatgpt的角色
+
+you are javascript master. what is the difference between promise and callback in javascript?
 
 # 在提示词中使用splaceholders
