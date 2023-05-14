@@ -151,6 +151,8 @@ Source: Conversation with Bing, 2023/5/14
 
 # 代码问题
 
+每当遇见代码问题的时候，可以直接把报错粘贴进chatgpt，最多补充一个运行环境。
+
 - 编译问题可以直接输入prompt
 - runtime问题可以增加运行环境提示
 
