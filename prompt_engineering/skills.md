@@ -5,6 +5,13 @@
 - step by step
 - in great details
 
+what is the difference between promise and callback in javascript?
+
+- explain in great detail
+- explain step by step
+- give code snippet
+- give insightful summary
+
 # 用---或者%等符号来分割问题
 
 当需要对很长的文本进行答疑解惑的时候，可以用---分割文本和问题
