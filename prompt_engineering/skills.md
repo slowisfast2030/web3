@@ -15,30 +15,18 @@
 
 
 # 用列表将需求拆分成子任务
+将复杂任务拆解成一系列简单任务。
 
-# 提问时增加关键词
+prompt:
+>you are javascript master. give the code examples to process the file, including
+>- callback
+>- promise
+>- async/await
+>- event emitter
+>
+>explain one by one.
 
-- step by step
-- in great details
-
-you are javascript master. what is the difference between promise and callback in javascript?
-
-- explain in great detail
-- explain step by step
-- give code snippet
-- give insightful summary
-
-
-you are javascript master. give the code examples to process the file, including
-
-- callback
-- promise
-- async/await
-- event emitter
-
-explain one by one.
-
------answer
+answer:
 
 Sure, I can help you with that. Here are some code examples to process a file in Node.js using different approaches:
 
@@ -141,6 +129,20 @@ stream.on('data', chunk => {
 ```
 
 I hope this helps you understand how to process files in Node.js using different techniques.😊
+
+# 提问时增加关键词
+
+- step by step
+- in great details
+
+you are javascript master. what is the difference between promise and callback in javascript?
+
+- explain in great detail
+- explain step by step
+- give code snippet
+- give insightful summary
+
+
 
 Source: Conversation with Bing, 2023/5/14
 (1) A Basic Guide to Manipulating the File System in Node.js - MUO. https://www.makeuseof.com/nodejs-filesystem-basic-guide/.
