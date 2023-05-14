@@ -1,8 +1,13 @@
-# 实际例子
+# 例子1
 
-如果在一个目录结构中寻找一个特定后缀的文件，可以直接把目录结构粘贴进chatgpt，用---分割后，直接提问。
+如何在一个目录结构寻找一个特定后缀的文件：
+- 使用`tree`命令打印出目录树
+- 把目录树直接粘贴进chatgpt
+- 用---分割后，直接提问
 
-如果是我要解决这个问题，我问的问题会更加原子化：直接问如何找到某个文件夹下的带有特定后缀的文件。我自己会对自己遇到的问题做一层抽象。而这个youtuber直接把目录结构粘贴进去了。
+如果是我要解决这个问题：
+- 我想不到那么具体。我问的问题会更加抽象化：如何找到某个文件夹下的带有特定后缀的文件。
+- 我自己会对自己遇到的问题做一层抽象。
 
 
 # 用列表将需求拆分成子任务
@@ -35,7 +40,7 @@ Sure, I can help you with that. Here are some code examples to process a file in
 
 - **Callback**: This is the traditional way of handling asynchronous operations in Node.js. You pass a function as an argument to another function that performs some task, and then call the function when the task is done or when an error occurs. For example:
 
-```javascript
+```js
 // Import the fs module
 var fs = require('fs');
 
