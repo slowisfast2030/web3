@@ -130,47 +130,45 @@ stream.on('data', chunk => {
 
 I hope this helps you understand how to process files in Node.js using different techniques.😊
 
-# 提问时增加关键词
-
-- step by step
+# 提问时增加修饰词
+最典型的几个：
+- step by step 
+一方面让模型自己去一步步思考，另一方面也规范了模型的输出结构。
 - in great details
+让模型给出尽可能详细的回答。
 
-you are javascript master. what is the difference between promise and callback in javascript?
+prompt:
 
-- explain in great detail
-- explain step by step
-- give code snippet
-- give insightful summary
-
-
-
-Source: Conversation with Bing, 2023/5/14
-(1) A Basic Guide to Manipulating the File System in Node.js - MUO. https://www.makeuseof.com/nodejs-filesystem-basic-guide/.
-(2) File processing in Node.js: A comprehensive guide. https://blog.logrocket.com/file-processing-node-js-comprehensive-guide/.
-(3) node.js - Nodejs - read line by line from file, perform async action .... https://stackoverflow.com/questions/28009848/nodejs-read-line-by-line-from-file-perform-async-action-for-each-line-and-res.
-(4) Node.js Examples – Basic Examples, Module Examples, Advanced Examples. https://www.tutorialkart.com/nodejs/node-js-examples/.
-(5) Node.js File System - GeeksforGeeks. https://www.geeksforgeeks.org/node-js-file-system/.
-(6) Node.js Examples - GeeksforGeeks. https://www.geeksforgeeks.org/node-js-examples/.
+>you are javascript master. what is the difference between promise >and callback in javascript?
+>- explain in great detail
+>- explain step by step
+>- give code snippet
+>- give insightful summary
+>
 
 # 用---或者%等符号来分割问题
+当需要对很长的文本进行答疑解惑的时候，可以用---分割文本和问题。
 
-当需要对很长的文本进行答疑解惑的时候，可以用---分割文本和问题
-
-# 先给出问题，再给出文本
+# 先给出问题，再给出文本？
+是先给出文本还是先给出问题呢？gpt4的官方演示是先文档后问题。而openai的提示词教程却建议先问题后文档。
 
 # 输出给定格式要求
+这一点一直被忽略了。给定格式要求后，输出的结果更方便阅读。
+比如：解释python的递归代码的时候，可以让模型按照表格输出模型的一步步的递归过程。
 
 # 代码问题
+每当遇见代码问题的时候，可以直接把报错粘贴进chatgpt。
+为了方便chatgpt更容易找出bug，可以补充运行环境的描述。
 
-每当遇见代码问题的时候，可以直接把报错粘贴进chatgpt，最多补充一个运行环境。
-
-- 编译问题可以直接输入prompt
-- runtime问题可以增加运行环境提示
+示例：
+- compile问题
+- runtime问题
+- shell命令报错
 
 # 设定你的角色
+I am new to node.js. what is the difference between promise and callback in javascript?
 
 # 设定chatgpt的角色
-
-you are javascript master. what is the difference between promise and callback in javascript?
+You are javascript master. 
 
 # 在提示词中使用splaceholders
