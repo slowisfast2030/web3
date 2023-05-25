@@ -1,0 +1,22 @@
+{
+  "name": "linus_notebook",
+  "version": "1.0.0",
+  "description": "我们与区块链进行通信的方式是通过RPC。",
+  "main": "temp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slowisfast2030/web3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/slowisfast2030/web3/issues"
+  },
+  "homepage": "https://github.com/slowisfast2030/web3#readme",
+  "dependencies": {
+    "@chainlink/contracts": "^0.6.1"
+  }
+}
