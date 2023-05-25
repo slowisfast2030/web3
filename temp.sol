@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+// import "./node_modules/@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-// interface AggregatorV3Interface {
-//     function latestRoundData()
-//         external
-//         view
-//         returns (
-//             uint80 roundId,
-//             int answer,
-//             uint startedAt,
-//             uint updatedAt,
-//             uint80 answeredInRound
-//         );
-// }
+interface AggregatorV3Interface {
+    function latestRoundData()
+        external
+        view
+        returns (
+            uint80 roundId,
+            int answer,
+            uint startedAt,
+            uint updatedAt,
+            uint80 answeredInRound
+        );
+}
 
 contract ChainlinkPriceOracle {
     AggregatorV3Interface internal priceFeed;
