@@ -5,9 +5,12 @@ contract CSAMM {
     IERC20 public immutable token0;
     IERC20 public immutable token1;
 
+    // 两种erc20代币的数量
     uint public reserve0;
     uint public reserve1;
 
+    // 这两个变量记录了为这个pool添加的流动性
+    // 状态变量可以认为是一个数据库
     uint public totalSupply;
     mapping(address => uint) public balanceOf;
 
@@ -18,6 +21,9 @@ contract CSAMM {
         token1 = IERC20(_token1);
     }
 
+    // _mint函数在addLiquidity函数中被调用
+    // 当用户未pool添加了流动性后，需要返回给用户一个share的凭证
+    // 这个凭证可以用来提取用户的流动性
     function _mint(address _to, uint _amount) private {
         balanceOf[_to] += _amount;
         totalSupply += _amount;
