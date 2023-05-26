@@ -1,127 +1,61 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-contract CSAMM {
-    IERC20 public immutable token0;
-    IERC20 public immutable token1;
-
-    // 两种erc20代币的数量
-    uint public reserve0;
-    uint public reserve1;
-
-    // 这两个变量记录了为这个pool添加的流动性
-    // 状态变量可以认为是一个数据库
+contract Vault {
+    IERC20 public immutable token;
     uint public totalSupply;
     mapping(address => uint) public balanceOf;
 
-    constructor(address _token0, address _token1) {
-        // NOTE: This contract assumes that token0 and token1
-        // both have same decimals
-        token0 = IERC20(_token0);
-        token1 = IERC20(_token1);
+    constructor(address _token) {
+        token = IERC20(_token);
     }
 
-    // _mint函数在addLiquidity函数中被调用
-    // 当用户未pool添加了流动性后，需要返回给用户一个share的凭证
-    // 这个凭证可以用来提取用户的流动性
-    function _mint(address _to, uint _amount) private {
-        balanceOf[_to] += _amount;
-        totalSupply += _amount;
+    function _mint(address _to, uint _shares) private {
+        totalSupply += _shares;
+        balanceOf[_to] += _shares;
     }
 
-    function _burn(address _from, uint _amount) private {
-        balanceOf[_from] -= _amount;
-        totalSupply -= _amount;
+    function _burn(address _from, uint _shares) private {
+        totalSupply -= _shares;
+        balanceOf[_from] -= _shares;
     }
 
-    function _update(uint _res0, uint _res1) private {
-        reserve0 = _res0;
-        reserve1 = _res1;
-    }
-
-    function swap(address _tokenIn, uint _amountIn) external returns (uint amountOut) {
-        require(
-            _tokenIn == address(token0) || _tokenIn == address(token1),
-            "invalid token"
-        );
-
-        bool isToken0 = _tokenIn == address(token0);
-
-        (IERC20 tokenIn, IERC20 tokenOut, uint resIn, uint resOut) = isToken0
-            ? (token0, token1, reserve0, reserve1)
-            : (token1, token0, reserve1, reserve0);
-
-        tokenIn.transferFrom(msg.sender, address(this), _amountIn);
-        uint amountIn = tokenIn.balanceOf(address(this)) - resIn;
-
-        // 0.3% fee
-        amountOut = (amountIn * 997) / 1000;
-
-        (uint res0, uint res1) = isToken0
-            ? (resIn + amountIn, resOut - amountOut)
-            : (resOut - amountOut, resIn + amountIn);
-
-        _update(res0, res1);
-        tokenOut.transfer(msg.sender, amountOut);
-    }
-
-    function addLiquidity(uint _amount0, uint _amount1) external returns (uint shares) {
-        token0.transferFrom(msg.sender, address(this), _amount0);
-        token1.transferFrom(msg.sender, address(this), _amount1);
-
-        uint bal0 = token0.balanceOf(address(this));
-        uint bal1 = token1.balanceOf(address(this));
-
-        uint d0 = bal0 - reserve0;
-        uint d1 = bal1 - reserve1;
-
+    function deposit(uint _amount) external {
         /*
-        a = amount in
-        L = total liquidity
+        a = amount
+        B = balance of token before deposit
+        T = total supply
         s = shares to mint
-        T = total supply
 
-        s should be proportional to increase from L to L + a
-        (L + a) / L = (T + s) / T
+        (T + s) / T = (a + B) / B 
 
-        s = a * T / L
+        s = aT / B
         */
-        if (totalSupply > 0) {
-            shares = ((d0 + d1) * totalSupply) / (reserve0 + reserve1);
+        uint shares;
+        if (totalSupply == 0) {
+            shares = _amount;
         } else {
-            shares = d0 + d1;
+            shares = (_amount * totalSupply) / token.balanceOf(address(this));
         }
 
-        require(shares > 0, "shares = 0");
         _mint(msg.sender, shares);
-
-        _update(bal0, bal1);
+        token.transferFrom(msg.sender, address(this), _amount);
     }
 
-    function removeLiquidity(uint _shares) external returns (uint d0, uint d1) {
+    function withdraw(uint _shares) external {
         /*
-        a = amount out
-        L = total liquidity
-        s = shares
+        a = amount
+        B = balance of token before withdraw
         T = total supply
+        s = shares to burn
 
-        a / L = s / T
+        (T - s) / T = (B - a) / B 
 
-        a = L * s / T
-          = (reserve0 + reserve1) * s / T
+        a = sB / T
         */
-        d0 = (reserve0 * _shares) / totalSupply;
-        d1 = (reserve1 * _shares) / totalSupply;
-
+        uint amount = (_shares * token.balanceOf(address(this))) / totalSupply;
         _burn(msg.sender, _shares);
-        _update(reserve0 - d0, reserve1 - d1);
-
-        if (d0 > 0) {
-            token0.transfer(msg.sender, d0);
-        }
-        if (d1 > 0) {
-            token1.transfer(msg.sender, d1);
-        }
+        token.transfer(msg.sender, amount);
     }
 }
 
